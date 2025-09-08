@@ -1,11 +1,30 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Bed, Bath, Wifi, Plus, X, MapPin, User, Image as ImageIcon, List, Info, Star, Home, Loader2, Users } from "lucide-react";
+import {
+  Bed,
+  Bath,
+  Wifi,
+  Plus,
+  X,
+  MapPin,
+  User,
+  Image as ImageIcon,
+  List,
+  Info,
+  Star,
+  Home,
+  Loader2,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
-import { useProperties, useCreateProperty, useDeleteProperty } from "@/hooks/use-api";
+import {
+  useProperties,
+  useCreateProperty,
+  useDeleteProperty,
+} from "@/hooks/use-api";
 import { Property, apiClient } from "@/lib/api";
 import { toast } from "sonner";
 
@@ -13,18 +32,25 @@ export default function PropertyListPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [showDialog, setShowDialog] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [propertyToDelete, setPropertyToDelete] = useState<Property | null>(null);
+  const [propertyToDelete, setPropertyToDelete] = useState<Property | null>(
+    null
+  );
+
   const [form, setForm] = useState({
     name: "",
+    nickname: "",
     description: "",
     address: "",
     refNo: "",
     price: "",
     longitude: "",
+    petsfee:"",
+    petsNos:"",
+    cleaningfee:"",
     latitude: "",
     guests: "",
-    rooms: "",
-    size: "",
+    bedrooms: "",
+    bathrooms: "",
     features: [""],
     images: [] as File[],
   });
@@ -54,7 +80,11 @@ export default function PropertyListPage() {
     }
   };
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
+  function handleChange(
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) {
     const { name, value, type } = e.target;
     let checked = false;
     if (type === "checkbox") {
@@ -78,7 +108,10 @@ export default function PropertyListPage() {
   }
 
   function removeFeature(index: number) {
-    setForm((f) => ({ ...f, features: f.features.filter((_, i) => i !== index) }));
+    setForm((f) => ({
+      ...f,
+      features: f.features.filter((_, i) => i !== index),
+    }));
   }
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -88,19 +121,29 @@ export default function PropertyListPage() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    
+
     // Validation
-    if (!form.name || !form.description || !form.address || !form.refNo || !form.price || !form.longitude || !form.latitude) {
+    if (
+      !form.name ||
+      !form.description ||
+      !form.address ||
+      !form.refNo ||
+      !form.price ||
+      !form.longitude ||
+      !form.latitude
+    ) {
       toast.error("Please fill in all required fields");
       return;
     }
 
     if (form.images.length !== 4) {
-      toast.error("Exactly 4 featured images are required for property creation");
+      toast.error(
+        "Exactly 4 featured images are required for property creation"
+      );
       return;
     }
 
-    const features = form.features.filter(f => f.trim() !== '');
+    const features = form.features.filter((f) => f.trim() !== "");
     if (features.length === 0) {
       toast.error("At least one feature is required");
       return;
@@ -108,30 +151,32 @@ export default function PropertyListPage() {
 
     try {
       const formData = new FormData();
-      formData.append('name', form.name);
-      formData.append('description', form.description);
-      formData.append('address', form.address);
-      formData.append('refNo', form.refNo);
-      formData.append('price', form.price);
-      formData.append('guests', form.guests)
-      formData.append('rooms', form.rooms)
-      formData.append('size', form.size)
-      formData.append('longitude', form.longitude);
-      formData.append('latitude', form.latitude);
+      formData.append("name", form.name);
+      formData.append("nickname", form.nickname);
+      formData.append("description", form.description);
+      formData.append("address", form.address);
+      formData.append("refNo", form.refNo);
+      formData.append("price", form.price);
+      formData.append("petsNos", form.petsNos);
+      formData.append("petsfee", form.petsfee);
+      formData.append("cleaningfee", form.cleaningfee);
+      formData.append("guests", form.guests);
+      formData.append("bedrooms", form.bedrooms);
+      formData.append("bathrooms", form.bathrooms);
+      formData.append("longitude", form.longitude);
+      formData.append("latitude", form.latitude);
 
-      console.log(form.guests,form.rooms,form.size)
-      
       // Add features as array (not JSON string)
-      features.forEach(feature => {
-        formData.append('features', feature);
+      features.forEach((feature) => {
+        formData.append("features", feature);
       });
-      
+
       // Add images
       form.images.forEach((image, index) => {
-        formData.append('images', image);
+        formData.append("images", image);
       });
 
-      console.log(formData.get('guests'));
+      console.log(formData.get("guests"));
 
       await createPropertyActions.execute(formData);
       toast.success("Property created successfully!");
@@ -139,30 +184,36 @@ export default function PropertyListPage() {
       resetForm();
       loadProperties(); // Reload the list
     } catch (error) {
-      console.error('Property creation error:', error);
-      toast.error(error instanceof Error ? error.message : "Failed to create property");
+      console.error("Property creation error:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to create property"
+      );
     }
   }
 
   function resetForm() {
     setForm({
       name: "",
+      nickname: "",
       description: "",
       address: "",
       refNo: "",
       price: "",
       longitude: "",
+      petsfee:"",
+      petsNos:"",
+      cleaningfee:"",
       latitude: "",
       guests: "",
-      rooms: "",
-      size: "",
+      bedrooms: "",
+      bathrooms: "",
       features: [""],
       images: [],
     });
   }
 
   async function handleDeleteProperty(id: string) {
-    const property = properties.find(p => p.id === id);
+    const property = properties.find((p) => p.id === id);
     if (property) {
       setPropertyToDelete(property);
       setShowDeleteConfirm(true);
@@ -171,7 +222,7 @@ export default function PropertyListPage() {
 
   async function confirmDelete() {
     if (!propertyToDelete) return;
-    
+
     try {
       await deletePropertyActions.execute(propertyToDelete.id);
       toast.success("Property and all related data deleted successfully!");
@@ -179,8 +230,10 @@ export default function PropertyListPage() {
       setPropertyToDelete(null);
       loadProperties(); // Reload the list
     } catch (error) {
-      console.error('Property deletion error:', error);
-      toast.error(error instanceof Error ? error.message : "Failed to delete property");
+      console.error("Property deletion error:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete property"
+      );
     }
   }
 
@@ -205,7 +258,7 @@ export default function PropertyListPage() {
       <div className="p-6 bg-gray-50 min-h-full flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 mb-4">Failed to load properties</p>
-          <button 
+          <button
             onClick={loadProperties}
             className="px-4 py-2 bg-teal-600 text-white rounded-lg"
           >
@@ -221,7 +274,9 @@ export default function PropertyListPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Our Lodges</h1>
-          <p className="text-gray-600 mt-1">Discover our beautiful properties in the Lake District</p>
+          <p className="text-gray-600 mt-1">
+            Discover our beautiful properties in the Lake District
+          </p>
         </div>
         <button
           className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg shadow transition"
@@ -237,7 +292,7 @@ export default function PropertyListPage() {
           <form
             onSubmit={handleSubmit}
             className="bg-white rounded-2xl shadow-2xl p-10 w-full max-w-4xl relative overflow-y-auto max-h-screen border border-gray-200"
-            style={{ scrollbarGutter: 'stable' }}
+            style={{ scrollbarGutter: "stable" }}
           >
             <button
               type="button"
@@ -256,118 +311,192 @@ export default function PropertyListPage() {
                 <Info className="w-5 h-5 text-teal-500" /> Basic Details
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-semibold mb-2">Name</label>
-                  <input 
-                    name="name" 
-                    value={form.name} 
-                    onChange={handleChange} 
-                    required 
-                    className="w-full border rounded-lg px-4 py-2" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-2">Reference Number</label>
-                  <input 
-                    name="refNo" 
-                    value={form.refNo} 
-                    onChange={handleChange} 
-                    required 
-                    className="w-full border rounded-lg px-4 py-2" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-2">Price</label>
-                  <input 
-                    name="price" 
-                    type="number"
-                    value={form.price} 
-                    onChange={handleChange} 
-                    required 
-                    className="w-full border rounded-lg px-4 py-2" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-2">No of guests</label>
-                  <input 
-                    name="guests"
-                    type="text" 
-                    value={form.guests} 
-                    onChange={handleChange} 
-                    required 
-                    className="w-full border rounded-lg px-4 py-2" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-2">Longitude</label>
-                  <input 
-                    name="longitude" 
-                    type="number"
-                    step="any"
-                    value={form.longitude} 
-                    onChange={handleChange} 
-                    required 
-                    className="w-full border rounded-lg px-4 py-2" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-2">Latitude</label>
-                  <input 
-                    name="latitude" 
-                    type="number"
-                    step="any"
-                    value={form.latitude} 
-                    onChange={handleChange} 
-                    required 
-                    className="w-full border rounded-lg px-4 py-2" 
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-semibold mb-2">No of Rooms available</label>
-                  <input 
-                    name="rooms" 
-                    type="text"
-                    step="any"
-                    value={form.rooms} 
-                    onChange={handleChange} 
-                    required
-                    className="w-full border rounded-lg px-4 py-2" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-2">Size</label>
-                  <input 
-                    name="size" 
-                    type="text"
-                    step="any"
-                    value={form.size} 
-                    onChange={handleChange} 
-                    required 
-                    className="w-full border rounded-lg px-4 py-2" 
-                  />
-                </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-semibold mb-2">Address</label>
+                  <label className="block text-sm font-semibold mb-2">
+                    Name
+                  </label>
                   <input
-                    name="address" 
+                    name="name"
                     type="text"
                     step="any"
-                    value={form.address} 
-                    onChange={handleChange} 
+                    value={form.name}
+                    onChange={handleChange}
                     required
-                    className="w-full border rounded-lg px-4 py-2" 
+                    className="w-full border rounded-lg px-4 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-2">
+                    Nickname
+                  </label>
+                  <input
+                    name="nickname"
+                    value={form.nickname}
+                    onChange={handleChange}
+                    required
+                    className="w-full border rounded-lg px-4 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-2">
+                    Reference Number
+                  </label>
+                  <input
+                    name="refNo"
+                    value={form.refNo}
+                    onChange={handleChange}
+                    required
+                    className="w-full border rounded-lg px-4 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-2">
+                    Price
+                  </label>
+                  <input
+                    name="price"
+                    type="number"
+                    value={form.price}
+                    onChange={handleChange}
+                    required
+                    className="w-full border rounded-lg px-4 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-2">
+                    Maximum guests
+                  </label>
+                  <input
+                    name="guests"
+                    type="text"
+                    value={form.guests}
+                    onChange={handleChange}
+                    required
+                    className="w-full border rounded-lg px-4 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-2">
+                    Pets (Enter 0 if pets not allowed)
+                  </label>
+                  <input
+                    name="petsNos"
+                    value={form.petsNos}
+                    onChange={handleChange}
+                    required
+                    className="w-full border rounded-lg px-4 py-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold mb-2">
+                    Pets fee
+                  </label>
+                  <input
+                    name="petsfee"
+                    value={form.petsfee}
+                    onChange={handleChange}
+                    required
+                    className="w-full border rounded-lg px-4 py-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold mb-2">
+                    Cleaning fee
+                  </label>
+                  <input
+                    name="cleaningfee"
+                    value={form.cleaningfee}
+                    onChange={handleChange}
+                    required
+                    className="w-full border rounded-lg px-4 py-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold mb-2">
+                    Longitude
+                  </label>
+                  <input
+                    name="longitude"
+                    type="number"
+                    step="any"
+                    value={form.longitude}
+                    onChange={handleChange}
+                    required
+                    className="w-full border rounded-lg px-4 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-2">
+                    Latitude
+                  </label>
+                  <input
+                    name="latitude"
+                    type="number"
+                    step="any"
+                    value={form.latitude}
+                    onChange={handleChange}
+                    required
+                    className="w-full border rounded-lg px-4 py-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold mb-2">
+                    Bedrooms
+                  </label>
+                  <input
+                    name="bedrooms"
+                    type="text"
+                    step="any"
+                    value={form.bedrooms}
+                    onChange={handleChange}
+                    required
+                    className="w-full border rounded-lg px-4 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-2">
+                    Bathrooms
+                  </label>
+                  <input
+                    name="bathrooms"
+                    type="text"
+                    step="any"
+                    value={form.bathrooms}
+                    onChange={handleChange}
+                    required
+                    className="w-full border rounded-lg px-4 py-2"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-semibold mb-2">Description</label>
-                  <textarea 
-                    name="description" 
-                    value={form.description} 
-                    onChange={handleChange} 
+                  <label className="block text-sm font-semibold mb-2">
+                    Address
+                  </label>
+                  <input
+                    name="address"
+                    type="text"
+                    step="any"
+                    value={form.address}
+                    onChange={handleChange}
                     required
-                    className="w-full border rounded-lg px-4 py-2" 
-                    rows={3} 
+                    placeholder="street, suite, city, state, zip, country"
+                    className="w-full border rounded-lg px-4 py-2"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold mb-2">
+                    Description
+                  </label>
+                  <textarea
+                    name="description"
+                    value={form.description}
+                    onChange={handleChange}
+                    required
+                    className="w-full border rounded-lg px-4 py-2"
+                    rows={3}
                   />
                 </div>
               </div>
@@ -408,13 +537,15 @@ export default function PropertyListPage() {
             {/* Images */}
             <div className="mb-10 p-6 rounded-xl bg-gray-50 border border-gray-200">
               <h3 className="font-bold text-xl mb-6 text-teal-700 flex items-center gap-2">
-                <ImageIcon className="w-5 h-5 text-teal-500" /> Featured Images (Exactly 4 required)
+                <ImageIcon className="w-5 h-5 text-teal-500" /> Featured Images
+                (Exactly 4 required)
               </h3>
               <p className="text-sm text-gray-600 mb-4">
-                These images will be displayed as the main featured images for the property. 
-                They will appear in property listings and as the primary gallery.
+                These images will be displayed as the main featured images for
+                the property. They will appear in property listings and as the
+                primary gallery.
               </p>
-                  <input
+              <input
                 type="file"
                 multiple
                 accept="image/*"
@@ -422,8 +553,15 @@ export default function PropertyListPage() {
                 className="w-full border rounded-lg px-4 py-2"
                 required
               />
-              <div className={`text-sm mt-2 ${form.images.length === 4 ? 'text-green-600' : 'text-red-600'}`}>
-                Selected {form.images.length} featured images. {form.images.length === 4 ? '✓ Perfect!' : `You need exactly 4 featured images.`}
+              <div
+                className={`text-sm mt-2 ${
+                  form.images.length === 4 ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                Selected {form.images.length} featured images.{" "}
+                {form.images.length === 4
+                  ? "✓ Perfect!"
+                  : `You need exactly 4 featured images.`}
               </div>
               {form.images.length > 0 && (
                 <div className="mt-3 grid grid-cols-2 gap-2">
@@ -436,8 +574,8 @@ export default function PropertyListPage() {
                       />
                       <div className="absolute top-1 right-1 bg-black bg-opacity-50 text-white text-xs px-1 rounded">
                         Featured {index + 1}
-                </div>
-              </div>
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}
@@ -448,7 +586,9 @@ export default function PropertyListPage() {
               disabled={createPropertyState.loading || form.images.length !== 4}
               className="w-full bg-teal-600 hover:bg-teal-700 disabled:bg-gray-400 text-white py-4 rounded-xl font-bold text-xl mt-2 shadow flex items-center justify-center gap-2"
             >
-              {createPropertyState.loading && <Loader2 className="w-5 h-5 animate-spin" />}
+              {createPropertyState.loading && (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              )}
               Add Lodge
             </button>
           </form>
@@ -463,20 +603,27 @@ export default function PropertyListPage() {
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <X className="w-8 h-8 text-red-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Delete Property</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                Delete Property
+              </h3>
               <p className="text-gray-600 mb-6">
-                Are you sure you want to delete <strong>{propertyToDelete.name}</strong>?
+                Are you sure you want to delete{" "}
+                <strong>{propertyToDelete.name}</strong>?
               </p>
-              
+
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-left">
-                <p className="text-sm font-semibold text-red-800 mb-2">This will also delete:</p>
+                <p className="text-sm font-semibold text-red-800 mb-2">
+                  This will also delete:
+                </p>
                 <ul className="text-sm text-red-700 space-y-1">
                   <li>• All gallery images</li>
                   <li>• All bookings and payments</li>
                   <li>• All comments and reviews</li>
                   <li>• All enquiry bookings</li>
                 </ul>
-                <p className="text-sm font-semibold text-red-800 mt-2">This action cannot be undone.</p>
+                <p className="text-sm font-semibold text-red-800 mt-2">
+                  This action cannot be undone.
+                </p>
               </div>
 
               <div className="flex gap-3">
@@ -505,7 +652,10 @@ export default function PropertyListPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {properties.map((property) => (
-          <Card key={property.id} className="hover:shadow-lg transition-shadow duration-200 overflow-hidden">
+          <Card
+            key={property.id}
+            className="hover:shadow-lg transition-shadow duration-200 overflow-hidden"
+          >
             {/* Property Image with Overlays */}
             <div className="relative h-64 w-full bg-gray-200 overflow-hidden">
               {property.images && property.images.length > 0 ? (
@@ -515,9 +665,14 @@ export default function PropertyListPage() {
                   className="object-cover w-full h-full"
                   loading="lazy"
                   onError={(e) => {
-                    console.error('Image failed to load:', apiClient.getImageUrl(property.images[0]));
-                    e.currentTarget.style.display = 'none';
-                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                    console.error(
+                      "Image failed to load:",
+                      apiClient.getImageUrl(property.images[0])
+                    );
+                    e.currentTarget.style.display = "none";
+                    e.currentTarget.nextElementSibling?.classList.remove(
+                      "hidden"
+                    );
                   }}
                 />
               ) : (
@@ -525,16 +680,18 @@ export default function PropertyListPage() {
                   <span className="text-gray-500">No image</span>
                 </div>
               )}
-              
+
               {/* Rating Overlay - Bottom Left */}
               <div className="absolute bottom-3 left-3 bg-white rounded-lg px-2 py-1 flex items-center gap-1 shadow-sm">
                 <Star className="w-4 h-4 text-yellow-500 fill-current" />
                 <span className="text-sm font-medium">4.5</span>
               </div>
-              
+
               {/* Price Overlay - Bottom Right */}
               <div className="absolute bottom-3 right-3 bg-black bg-opacity-80 text-white rounded-lg px-3 py-1 shadow-sm">
-                <span className="text-sm font-medium">£{property.price?.toLocaleString()}/night</span>
+                <span className="text-sm font-medium">
+                  £{property.price?.toLocaleString()}/night
+                </span>
               </div>
             </div>
 
@@ -565,24 +722,31 @@ export default function PropertyListPage() {
                   <div className="w-4 h-4 border-2 border-gray-400 rounded-sm flex items-center justify-center">
                     <div className="w-2 h-2 bg-gray-400 rounded-sm"></div>
                   </div>
-                  <span>{property.size} m²</span>
+                  <span>{property.bedrooms} bedrooms</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-4 h-4 border-2 border-gray-400 rounded-sm flex items-center justify-center">
+                    <div className="w-2 h-2 bg-gray-400 rounded-sm"></div>
+                  </div>
+                  <span>{property.bathrooms} bathrooms</span>
                 </div>
               </div>
 
               {/* Amenities Tags */}
               <div className="flex flex-wrap gap-2 mb-4">
-                {property.features && property.features.slice(0, 4).map((feature, index) => (
-                  <Badge 
-                    key={index} 
-                    variant="secondary" 
-                    className="bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs px-2 py-1"
-                  >
-                    {feature}
-                  </Badge>
-                ))}
+                {property.features &&
+                  property.features.slice(0, 4).map((feature, index) => (
+                    <Badge
+                      key={index}
+                      variant="secondary"
+                      className="bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs px-2 py-1"
+                    >
+                      {feature}
+                    </Badge>
+                  ))}
                 {property.features && property.features.length > 4 && (
-                  <Badge 
-                    variant="secondary" 
+                  <Badge
+                    variant="secondary"
                     className="bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs px-2 py-1"
                   >
                     +{property.features.length - 4}
@@ -592,8 +756,8 @@ export default function PropertyListPage() {
 
               {/* Action Buttons */}
               <div className="flex gap-2">
-                <Link 
-                  href={`/property/${property.id}`} 
+                <Link
+                  href={`/property/${property.id}`}
                   className="flex-1 border-2 border-teal-600 text-teal-600 bg-white text-center py-2 rounded-lg hover:bg-teal-50 transition font-medium text-sm"
                 >
                   View Details
@@ -612,9 +776,11 @@ export default function PropertyListPage() {
 
       {properties.length === 0 && !propertiesState.loading && (
         <div className="text-center py-12">
-          <p className="text-gray-500">No properties found. Add your first property!</p>
+          <p className="text-gray-500">
+            No properties found. Add your first property!
+          </p>
         </div>
       )}
     </div>
   );
-} 
+}

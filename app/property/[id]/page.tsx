@@ -28,10 +28,10 @@ import {
   useProperty,
   usePropertyGallery,
   useUpdateProperty,
+  useComments,
   useUploadGalleryImages,
   useDeleteGalleryImage,
   useUpdateGalleryImage,
-  useComments,
   useUploadFeaturedImages,
 } from "@/hooks/use-api";
 import { apiClient } from "@/lib/api";
@@ -62,14 +62,18 @@ export default function PropertyDetailPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
     name: "",
+    nickname: "",
     description: "",
     address: "",
     refNo: "",
     price: "",
+    petsfee: "",
+    pets: "",
+    cleaningfee: "",
     longitude: "",
-    size: "",
+    bathrooms: "",
     guests: "",
-    rooms: "",
+    bedrooms: "",
     latitude: "",
     features: [""],
     status: "active",
@@ -77,7 +81,6 @@ export default function PropertyDetailPage() {
 
   const [mainImages, setMainImages] = useState<string[]>([]);
   // const [selectedCategory, setSelectedCategory] = useState<string>("exterior");
-
 
   // API hooks
   const [propertyState, propertyActions] = useProperty(propertyId);
@@ -94,7 +97,6 @@ export default function PropertyDetailPage() {
     if (propertyId) {
       propertyActions.execute();
       galleryActions.execute();
-      // commentsActions.execute();
     }
   }, [propertyId]);
 
@@ -115,11 +117,15 @@ export default function PropertyDetailPage() {
     if (propertyState.data) {
       setEditForm({
         name: propertyState.data.name,
+        nickname: propertyState.data.nickname,
         description: propertyState.data.description,
+        cleaningfee: propertyState.data.cleaning_fee,
+        pets: propertyState.data.pets,
+        petsfee:propertyState.data.pets_fee,
         address: propertyState.data.address,
-        rooms: propertyState.data.rooms,
-        guests: propertyState.data.rooms,
-        size: propertyState.data.size,
+        bedrooms: propertyState.data.bedrooms,
+        guests: propertyState.data.guests,
+        bathrooms: propertyState.data.bathrooms,
         refNo: propertyState.data.refNo,
         price: propertyState.data.price?.toString() || "",
         longitude: propertyState.data.longitude?.toString() || "",
@@ -194,14 +200,18 @@ export default function PropertyDetailPage() {
       formData.append("price", editForm.price);
       formData.append("longitude", editForm.longitude);
       formData.append("latitude", editForm.latitude);
+      formData.append("cleaningfee", editForm.cleaningfee);
+      formData.append("petsfee", editForm.petsfee);
+      formData.append("pets", editForm.pets);
       formData.append(
         "features",
         JSON.stringify(editForm.features.filter((f) => f.trim()))
       );
+      formData.append("nickname", editForm.nickname);
       formData.append("status", editForm.status);
-      formData.append("size", editForm.size);
+      formData.append("bathrooms", editForm.bathrooms);
       formData.append("guests", editForm.guests);
-      formData.append("rooms", editForm.rooms);
+      formData.append("bedrooms", editForm.bedrooms);
 
       await updatePropertyActions.execute(propertyId, formData);
       setIsEditing(false);
@@ -380,6 +390,19 @@ export default function PropertyDetailPage() {
                       className="w-full border rounded-lg px-3 py-2"
                     />
                   </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">
+                      Nickname
+                    </label>
+                    <input
+                      name="nickname"
+                      value={editForm.nickname}
+                      onChange={handleEditChange}
+                      className="w-full border rounded-lg px-3 py-2"
+                    />
+                  </div>
+
                   <div>
                     <label className="block text-sm font-semibold mb-2">
                       Reference Number
@@ -451,7 +474,7 @@ export default function PropertyDetailPage() {
                       value={editForm.description}
                       onChange={handleEditChange}
                       className="w-full border rounded-lg px-3 py-2"
-                      rows={4}
+                      rows={10}
                     />
                   </div>
                   <div className="grid grid-cols-3 gap-2">
@@ -468,26 +491,64 @@ export default function PropertyDetailPage() {
                     </div>
                     <div>
                       <label className="block text-sm font-semibold mb-2">
-                        No of rooms
+                        No of Bedrooms
                       </label>
                       <input
                         name="rooms"
-                        value={editForm.rooms}
+                        value={editForm.bedrooms}
+                        onChange={handleEditChange}
+                        className="w-full border rounded-lg px-3 py-2"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold mb-2">
+                        No of bathrooms
+                      </label>
+                      <input
+                        name="size"
+                        value={editForm.bathrooms}
+                        onChange={handleEditChange}
+                        className="w-full border rounded-lg px-3 py-2"
+                      />
+                    </div>
+
+                    {/*  */}
+                    <div>
+                      <label className="block text-sm font-semibold mb-2">
+                        No of Pets
+                      </label>
+                      <input
+                        name="pets"
+                        value={editForm.pets}
                         onChange={handleEditChange}
                         className="w-full border rounded-lg px-3 py-2"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-semibold mb-2">
-                        Size of the lodge
+                        Pets fee
                       </label>
                       <input
-                        name="size"
-                        value={editForm.size}
+                        name="petsfee"
+                        value={editForm.petsfee}
                         onChange={handleEditChange}
                         className="w-full border rounded-lg px-3 py-2"
                       />
                     </div>
+                    <div>
+                      <label className="block text-sm font-semibold mb-2">
+                        Cleaning fee
+                      </label>
+                      <input
+                        name="cleaningfee"
+                        value={editForm.cleaningfee}
+                        onChange={handleEditChange}
+                        className="w-full border rounded-lg px-3 py-2"
+                      />
+                    </div>
+                    {/*  */}
+                    
                   </div>
                   <div>
                     <label className="block text-sm font-semibold mb-2">
@@ -517,10 +578,9 @@ export default function PropertyDetailPage() {
           </Card>
 
           {/* Gallery */}
-          
-          <FeaturedImagesGallery isEditing={isEditing}/>
-          <GalleryImages isEditing={isEditing}/>
 
+          <FeaturedImagesGallery isEditing={isEditing} />
+          <GalleryImages isEditing={isEditing} />
 
           {/* Location */}
           <Card>
@@ -701,7 +761,7 @@ export default function PropertyDetailPage() {
             </CardContent>
           </Card>
         </div>
-      </div>      
+      </div>
     </div>
   );
 }

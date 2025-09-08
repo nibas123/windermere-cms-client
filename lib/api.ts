@@ -1,21 +1,23 @@
-import { stringify } from "querystring";
-
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 // Types
 export interface Property {
   id: string;
   name: string;
+  nickname:string
   description: string;
   address: string;
   refNo: string;
   longitude: number;
   latitude: number;
+  cleaning_fee:string;
+  pets:string;
+  pets_fee:string;
   features: string[];
   price: number;
   images: string[];
-  size:string;
-  rooms: string;
+  bathrooms:string;
+  bedrooms: string;
   guests: string;
   status: string;
   createdAt: string;
@@ -55,6 +57,7 @@ export interface User {
   email: string;
   name: string;
   role: string;
+  avatar: string;
 }
 
 export interface EnquiryBooking {

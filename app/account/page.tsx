@@ -140,7 +140,7 @@ export default function MyAccountPage() {
           <CardContent className="p-6 flex flex-col items-center text-center">
             <div className="relative mb-4">
               <Avatar className="w-24 h-24 animate-float">
-                <AvatarImage src={user.avatar || "/placeholder.svg?height=96&width=96"} />
+                <AvatarImage src={user?.avatar || "/placeholder.svg?height=96&width=96"} />
                 <AvatarFallback className="bg-gradient-to-br from-teal-100 to-teal-200 text-teal-700 text-3xl">
                   {getInitials(user.name || "User")}
                 </AvatarFallback>

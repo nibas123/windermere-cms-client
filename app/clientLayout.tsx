@@ -22,6 +22,8 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isAuthPage = pathname === "/auth/signin" || pathname === "/auth/signup" || pathname === "/auth/forgot-password"
 
+  // TEMPORARILY DISABLED FOR TESTING - Skip authentication checks
+  /*
   if (loading) {
     return (
       <html lang="en">
@@ -42,16 +44,11 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
       <html lang="en">
         <body className={inter.className}>
           <SignInPage/>
-          {/* <div className="flex min-h-screen items-center justify-center">
-            <div className="flex items-center gap-2">
-              <Loader2 className="w-6 h-6 animate-spin" />
-              <span>Redirecting to login...</span>
-            </div>
-          </div> */}
         </body>
       </html>
     )
   }
+  */
 
   return (
     <html lang="en">

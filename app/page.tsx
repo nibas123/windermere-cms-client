@@ -132,10 +132,10 @@ export default function Dashboard() {
             <div>
               <CardTitle className="text-lg font-semibold">Monthly Revenue</CardTitle>
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2">
-                {dashboardData.monthly_revenue ? (
+                {dashboardData.monthly_revenue !== null ? (
                   <>
                     <span className="text-xl lg:text-2xl font-bold animate-stat">
-                      {dashboardData.properties.currency} {dashboardData.monthly_revenue.toLocaleString()}
+                      {dashboardData.properties.currency} {(dashboardData.monthly_revenue as number).toLocaleString()}
                     </span>
                     <div className="flex items-center text-green-500 text-sm animate-stat">
                       <TrendingUp className="w-4 h-4 mr-1" />
@@ -155,7 +155,7 @@ export default function Dashboard() {
             </Button>
           </CardHeader>
           <CardContent>
-            {dashboardData.monthly_revenue ? (
+            {dashboardData.monthly_revenue !== null ? (
               <>
                 <div className="h-32 lg:h-48 flex items-end justify-between gap-1">
                   {[40, 60, 80, 45, 70, 55, 85, 65, 90, 75, 95, 80, 70, 85, 60].map((height, i) => (

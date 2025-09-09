@@ -177,6 +177,12 @@ export default function TestPropertyPage() {
 
   const testAuthStatus = async () => {
     try {
+      // Check if we're in the browser before accessing localStorage
+      if (typeof window === 'undefined') {
+        toast.error("This function can only run in the browser");
+        return;
+      }
+      
       const token = localStorage.getItem('authToken');
       if (!token) {
         toast.error("No auth token found. Please login first.");
@@ -419,7 +425,7 @@ export default function TestPropertyPage() {
             <div className="space-y-2 text-sm">
               <p><strong>API Base URL:</strong> {process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'}</p>
               <p><strong>Image Base URL:</strong> {process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:4000'}</p>
-              <p><strong>Auth Token:</strong> {localStorage.getItem('authToken') ? 'Present' : 'Missing'}</p>
+              <p><strong>Auth Token:</strong> {typeof window !== 'undefined' ? (localStorage.getItem('authToken') ? 'Present' : 'Missing') : 'N/A (SSR)'}</p>
               <p><strong>Test Property ID:</strong> {testPropertyId || 'None'}</p>
               <p><strong>Properties Count:</strong> {propertiesState.data?.length || 0}</p>
               <p><strong>Gallery Images Count:</strong> {galleryState.data?.length || 0}</p>

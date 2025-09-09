@@ -18,40 +18,52 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Set to false since we're bypassing auth
   const router = useRouter();
 
   const refreshUser = async () => {
     try {
-      const token = localStorage.getItem('authToken');
-      if (token) {
-        const userProfile = await apiClient.getUserProfile();
-        setUser(userProfile);
+      // Check if we're in the browser before accessing localStorage
+      if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('authToken');
+        if (token) {
+          const userProfile = await apiClient.getUserProfile();
+          setUser(userProfile);
+        }
       }
     } catch (error) {
       console.error('Failed to refresh user:', error);
-      // If token is invalid, clear it
-      localStorage.removeItem('authToken');
+      // If token is invalid, clear it (only in browser)
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('authToken');
+      }
       setUser(null);
     }
   };
 
   // Check if user is authenticated on mount
   useEffect(() => {
-    const initializeAuth = async () => {
-      const token = localStorage.getItem('authToken');
-      if (token) {
-        try {
-          await refreshUser();
-        } catch (error) {
-          console.error('Failed to initialize auth:', error);
-          localStorage.removeItem('authToken');
-        }
-      }
-      setLoading(false);
-    };
+    // Since we're in development/testing mode, skip auth initialization
+    // const initializeAuth = async () => {
+    //   // Only run on client side
+    //   if (typeof window !== 'undefined') {
+    //     const token = localStorage.getItem('authToken');
+    //     if (token) {
+    //       try {
+    //         await refreshUser();
+    //       } catch (error) {
+    //         console.error('Failed to initialize auth:', error);
+    //         localStorage.removeItem('authToken');
+    //       }
+    //     }
+    //   }
+    //   setLoading(false);
+    // };
 
-    initializeAuth();
+    // initializeAuth();
+    
+    // For testing - just set loading to false immediately
+    setLoading(false);
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -78,7 +90,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     apiClient.logout();
     setUser(null);
-    router.push('/auth/signin');
+    // Only access localStorage in browser
+    if (typeof window !== 'undefined') {
+      router.push('/auth/signin');
+    }
   };
 
   const value = {

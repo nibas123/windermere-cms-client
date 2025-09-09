@@ -5,7 +5,7 @@ import type React from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { MoreHorizontal, TrendingUp, Building2, ArrowUp } from "lucide-react"
+import { MoreHorizontal, TrendingUp, Home, Users, Calendar, Star, CheckCircle, ArrowUp } from "lucide-react"
 import { useGSAPAnimations, useHoverAnimations, useButtonAnimations } from "@/hooks/use-gsap-animations"
 
 export default function Dashboard() {
@@ -13,27 +13,27 @@ export default function Dashboard() {
   useHoverAnimations()
   useButtonAnimations()
 
-  // API response data
+  // Lodge booking website dashboard data
   const dashboardData = {
     users: {
       total: 4,
       admins: 4,
-      visitors: 5
+      visitors: 0
     },
     reviews: {
-      total: 4,
-      pending: 3,
+      total: 0,
+      pending: 0,
       approved: 0,
       withRating: 0
     },
     bookings: {
-      total: 4,
-      pending: 1,
-      cancelled: 2,
-      confirmed: 1
+      total: 0,
+      pending: 0,
+      cancelled: 0,
+      confirmed: 0
     },
     enquiries: {
-      total: 1
+      total: 0
     },
     locations: {
       cities: 1
@@ -42,7 +42,7 @@ export default function Dashboard() {
       total: 3,
       active: 3,
       currency: "GBP",
-      inactive: 3
+      inactive: 0
     },
     monthly_revenue: null
   }

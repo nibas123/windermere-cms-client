@@ -1,78 +1,200 @@
 "use client"
 
 import type React from "react"
+import { useState, useEffect } from "react"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { MoreHorizontal, TrendingUp, Home, Users, Calendar, Star, CheckCircle, ArrowUp } from "lucide-react"
+import { MoreHorizontal, TrendingUp, Home, Users, Calendar, Star, CheckCircle, ArrowUp, Loader2 } from "lucide-react"
 import { useGSAPAnimations, useHoverAnimations, useButtonAnimations } from "@/hooks/use-gsap-animations"
+
+// Types for API response
+interface DashboardData {
+  users: {
+    total: number
+    admins: number
+    visitors: number
+  }
+  reviews: {
+    total: number
+    pending: number
+    approved: number
+    withRating: number
+  }
+  bookings: {
+    total: number
+    pending: number
+    cancelled: number
+    confirmed: number
+  }
+  enquiries: {
+    total: number
+  }
+  locations: {
+    cities: number
+  }
+  properties: {
+    total: number
+    active: number
+    avgPrice: number
+    currency: string
+    inactive: number
+    avgPetsFee: number
+    avgCleaningFee: number
+  }
+  monthly_revenue: Array<{
+    month: string
+    currency: string
+    totalRevenue: number
+    successfulPayments: number
+  }>
+}
 
 export default function Dashboard() {
   const containerRef = useGSAPAnimations()
   useHoverAnimations()
   useButtonAnimations()
 
-  // Lodge booking website dashboard data
-  const dashboardData = {
-    users: {
-      total: 14,
-      admins: 4,
-      visitors: 10
-    },
-    reviews: {
-      total: 0,
-      pending: 0,
-      approved: 0,
-      withRating: 0
-    },
-    bookings: {
-      total: 10,
-      pending: 3,
-      cancelled: 1,
-      confirmed: 6
-    },
-    enquiries: {
-      total: 3
-    },
-    locations: {
-      cities: 1
-    },
-    properties: {
-      total: 3,
-      active: 3,
-      avgPrice: 126.67,
-      currency: "GBP",
-      inactive: 0,
-      avgPetsFee: 25,
-      avgCleaningFee: 100
-    },
-    monthly_revenue: [
-      {
-        month: "2024-02",
-        currency: "GBP",
-        totalRevenue: 2275,
-        successfulPayments: 2
-      },
-      {
-        month: "2024-03",
-        currency: "GBP",
-        totalRevenue: 960,
-        successfulPayments: 1
-      },
-      {
-        month: "2024-04",
-        currency: "GBP",
-        totalRevenue: 2100,
-        successfulPayments: 2
-      },
-      {
-        month: "2024-05",
-        currency: "GBP",
-        totalRevenue: 675,
-        successfulPayments: 1
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Fetch dashboard data from API
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const response = await fetch('https://pnboapcclagdszlabiwp.supabase.co/functions/v1/dashboard-endpoint', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBuYm9hcGNjbGFnZHN6bGFiaXdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1NDgwMjIsImV4cCI6MjA3MTEyNDAyMn0.502UKaBbcbgHCOjrX51u6hs6yjETZkOYcPl6ca4x3lM',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ name: "Functions" })
+        })
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch dashboard data: ${response.status}`)
+        }
+
+        const data = await response.json()
+        setDashboardData(data)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch dashboard data')
+        // Fallback to sample data for development
+        setDashboardData({
+          users: {
+            total: 0,
+            admins: 0,
+            visitors: 0
+          },
+          reviews: {
+            total: 0,
+            pending: 0,
+            approved: 0,
+            withRating: 0
+          },
+          bookings: {
+            total: 0,
+            pending: 0,
+            cancelled: 1,
+            confirmed: 6
+          },
+          enquiries: {
+            total: 3
+          },
+          locations: {
+            cities: 1
+          },
+          properties: {
+            total: 0,
+            active: 3,
+            avgPrice: 126.67,
+            currency: "GBP",
+            inactive: 0,
+            avgPetsFee: 25,
+            avgCleaningFee: 100
+          },
+          monthly_revenue: [
+            {
+              month: "2024-02",
+              currency: "GBP",
+              totalRevenue: 2275,
+              successfulPayments: 2
+            },
+            {
+              month: "2024-03",
+              currency: "GBP",
+              totalRevenue: 960,
+              successfulPayments: 1
+            },
+            {
+              month: "2024-04",
+              currency: "GBP",
+              totalRevenue: 2100,
+              successfulPayments: 2
+            },
+            {
+              month: "2024-05",
+              currency: "GBP",
+              totalRevenue: 675,
+              successfulPayments: 1
+            }
+          ]
+        })
+      } finally {
+        setLoading(false)
       }
-    ]
+    }
+
+    fetchDashboardData()
+  }, [])
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="p-4 lg:p-6 space-y-6 bg-gray-50 min-h-full">
+        <div className="flex items-center justify-center h-64">
+          <div className="flex items-center space-x-2">
+            <Loader2 className="w-6 h-6 animate-spin text-gray-600" />
+            <span className="text-gray-600">Loading dashboard...</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="p-4 lg:p-6 space-y-6 bg-gray-50 min-h-full">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="text-red-500 mb-2">Error loading dashboard</div>
+            <div className="text-gray-600 text-sm">{error}</div>
+            <Button 
+              className="mt-4" 
+              onClick={() => window.location.reload()}
+            >
+              Retry
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // No data state
+  if (!dashboardData) {
+    return (
+      <div className="p-4 lg:p-6 space-y-6 bg-gray-50 min-h-full">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center text-gray-600">
+            No dashboard data available
+          </div>
+        </div>
+      </div>
+    )
   }
 
   // Calculate total revenue
@@ -275,53 +397,64 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Enquiries & Actions */}
+        {/* System Overview */}
         <Card className="animate-card hover-lift shadow-sm bg-white/80 backdrop-blur-sm">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg font-semibold">Action Items</CardTitle>
-            <Button variant="ghost" size="icon" className="animate-button">
-              <MoreHorizontal className="w-4 h-4" />
-            </Button>
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold">System Overview</CardTitle>
+            <p className="text-sm text-gray-500">Current system status</p>
           </CardHeader>
           <CardContent className="space-y-4">
-            {dashboardData.enquiries.total > 0 && (
-              <div className="text-center py-6 border rounded-lg bg-purple-50">
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <CheckCircle className="w-6 h-6 text-purple-600" />
+            <div className="space-y-3">
+              <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <Home className="w-4 h-4 text-green-600" />
+                  </div>
+                  <span className="text-sm font-medium">Active Lodges</span>
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-1">{dashboardData.enquiries.total} New Enquiries</h3>
-                <p className="text-sm text-gray-500 mb-3">Follow up with potential guests</p>
-                <Button className="bg-purple-500 hover:bg-purple-600 text-white">
-                  View Enquiries
-                </Button>
+                <span className="text-sm font-semibold text-gray-900">{dashboardData.properties.active}</span>
               </div>
-            )}
-            
-            {dashboardData.bookings.pending > 0 && (
-              <div className="text-center py-6 border rounded-lg bg-yellow-50">
-                <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Calendar className="w-6 h-6 text-yellow-600" />
+              
+              <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <Users className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <span className="text-sm font-medium">Total Users</span>
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-1">{dashboardData.bookings.pending} Pending Bookings</h3>
-                <p className="text-sm text-gray-500 mb-3">Require confirmation</p>
-                <Button className="bg-yellow-500 hover:bg-yellow-600 text-white">
-                  Review Bookings
-                </Button>
+                <span className="text-sm font-semibold text-gray-900">{dashboardData.users.total}</span>
               </div>
-            )}
-            
-            {dashboardData.reviews.total === 0 && (
-              <div className="text-center py-6 border rounded-lg bg-gray-50">
-                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Star className="w-6 h-6 text-gray-400" />
+              
+              <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                    <Calendar className="w-4 h-4 text-orange-600" />
+                  </div>
+                  <span className="text-sm font-medium">Total Bookings</span>
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-1">No Reviews Yet</h3>
-                <p className="text-sm text-gray-500 mb-3">Encourage guests to leave reviews</p>
-                <Button variant="outline" className="border-gray-300">
-                  Setup Review System
-                </Button>
+                <span className="text-sm font-semibold text-gray-900">{dashboardData.bookings.total}</span>
               </div>
-            )}
+              
+              <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                    <CheckCircle className="w-4 h-4 text-purple-600" />
+                  </div>
+                  <span className="text-sm font-medium">Enquiries</span>
+                </div>
+                <span className="text-sm font-semibold text-gray-900">{dashboardData.enquiries.total}</span>
+              </div>
+              
+              <div className="flex items-center justify-between py-2">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                    <Star className="w-4 h-4 text-gray-600" />
+                  </div>
+                  <span className="text-sm font-medium">Reviews</span>
+                </div>
+                <span className="text-sm font-semibold text-gray-900">{dashboardData.reviews.total}</span>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

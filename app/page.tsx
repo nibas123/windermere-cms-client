@@ -191,15 +191,15 @@ export default function Dashboard() {
         {/* Analytics Overview */}
         <Card className="animate-card hover-lift shadow-sm bg-white/80 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="text-lg font-semibold">Analytics Overview</CardTitle>
-            <p className="text-sm text-gray-500">Current system metrics and activity</p>
+            <CardTitle className="text-lg font-semibold">System Health</CardTitle>
+            <p className="text-sm text-gray-500">Current operational status overview</p>
           </CardHeader>
           <CardContent>
             <div className="relative w-40 h-40 mx-auto mb-6">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                 {/* Background circle */}
                 <circle cx="50" cy="50" r="35" fill="none" stroke="#e5e7eb" strokeWidth="12" />
-                {/* Properties - 50% (Blue) */}
+                {/* Properties Status - 100% (All Active) */}
                 <circle
                   cx="50"
                   cy="50"
@@ -207,49 +207,43 @@ export default function Dashboard() {
                   fill="none"
                   stroke="#3b82f6"
                   strokeWidth="12"
-                  strokeDasharray="109.96 219.91"
+                  strokeDasharray="219.91 219.91"
                   strokeDashoffset="0"
-                  className="animate-progress"
-                  strokeLinecap="round"
-                />
-                {/* Users - 30% (Green) */}
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="35"
-                  fill="none"
-                  stroke="#10b981"
-                  strokeWidth="12"
-                  strokeDasharray="65.97 219.91"
-                  strokeDashoffset="-109.96"
-                  className="animate-progress"
-                  strokeLinecap="round"
-                />
-                {/* Cities - 20% (Orange) */}
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="35"
-                  fill="none"
-                  stroke="#f97316"
-                  strokeWidth="12"
-                  strokeDasharray="43.98 219.91"
-                  strokeDashoffset="-175.93"
                   className="animate-progress"
                   strokeLinecap="round"
                 />
                 {/* Center white circle */}
                 <circle cx="50" cy="50" r="20" fill="white" />
-                {/* Center icon */}
-                <circle cx="50" cy="50" r="8" fill="#e5e7eb" />
+                {/* Center checkmark or status indicator */}
+                <circle cx="50" cy="50" r="8" fill="#10b981" />
               </svg>
             </div>
             <div className="space-y-3">
               {[
-                { color: "bg-blue-500", label: "Properties", value: `${dashboardData.properties.total} units`, percentage: "42%" },
-                { color: "bg-green-500", label: "Users", value: `${dashboardData.users.total} total`, percentage: "58%" },
-                { color: "bg-orange-500", label: "Locations", value: `${dashboardData.locations.cities} city`, percentage: "100%" },
-                { color: "bg-gray-400", label: "Reviews", value: `${dashboardData.reviews.total} reviews`, percentage: "0%" },
+                { 
+                  color: "bg-green-500", 
+                  label: "Properties", 
+                  value: `${dashboardData.properties.active}/${dashboardData.properties.total}`, 
+                  status: "All Active" 
+                },
+                { 
+                  color: "bg-blue-500", 
+                  label: "Admin Users", 
+                  value: `${dashboardData.users.admins}`, 
+                  status: "Ready" 
+                },
+                { 
+                  color: "bg-orange-500", 
+                  label: "Locations", 
+                  value: `${dashboardData.locations.cities}`, 
+                  status: "Configured" 
+                },
+                { 
+                  color: "bg-gray-400", 
+                  label: "Reviews", 
+                  value: `${dashboardData.reviews.total}`, 
+                  status: "Awaiting" 
+                },
               ].map((item, index) => (
                 <div key={index} className="flex items-center justify-between animate-stat">
                   <div className="flex items-center gap-3">
@@ -257,7 +251,7 @@ export default function Dashboard() {
                     <span className="text-sm font-medium">{item.label}</span>
                     <span className="text-xs text-gray-500">{item.value}</span>
                   </div>
-                  <span className="text-sm font-semibold">{item.percentage}</span>
+                  <span className="text-sm font-semibold text-gray-600">{item.status}</span>
                 </div>
               ))}
             </div>

@@ -18,22 +18,22 @@ export default function Dashboard() {
     users: {
       total: 4,
       admins: 4,
-      visitors: 0
+      visitors: 5
     },
     reviews: {
-      total: 0,
-      pending: 0,
+      total: 4,
+      pending: 3,
       approved: 0,
       withRating: 0
     },
     bookings: {
-      total: 0,
-      pending: 0,
-      cancelled: 0,
-      confirmed: 0
+      total: 4,
+      pending: 1,
+      cancelled: 2,
+      confirmed: 1
     },
     enquiries: {
-      total: 0
+      total: 1
     },
     locations: {
       cities: 1
@@ -42,7 +42,7 @@ export default function Dashboard() {
       total: 3,
       active: 3,
       currency: "GBP",
-      inactive: 0
+      inactive: 3
     },
     monthly_revenue: null
   }
